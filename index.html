@@ -64,7 +64,7 @@ section[id]{scroll-margin-top:56px}
 .nav ul a:hover,.nav ul a.on{opacity:1;text-decoration:none}
 .pill{display:inline-flex;align-items:center;padding:6px 14px;border-radius:980px;background:var(--btn);color:var(--btn-fg);font-size:13px;font-weight:500;white-space:nowrap}
 .pill:hover{text-decoration:none;filter:brightness(1.08)}
-@media(max-width:760px){.nav ul{display:none}}
+@media(max-width:760px){.nav ul li:not(.keep){display:none}.nav ul{gap:0}}
 
 /* hero */
 .hero{padding-top:clamp(48px,9vw,112px);padding-bottom:clamp(40px,6vw,80px);text-align:center}
@@ -229,6 +229,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
       <li><a href="#work">Work</a></li>
       <li><a href="#path">Path</a></li>
       <li><a href="#story">Story</a></li>
+      <li class="keep"><a href="about/">About</a></li>
     </ul>
     <a class="pill" href="#contact">Get in touch</a>
   </div>
@@ -413,7 +414,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
   <div class="wrap">
     <div class="sec-head reveal"><h2 id="ph">The path.</h2></div>
     <ol class="timeline">
-      <li><time>Spring and Fall 2026</time><div><h3>Head TA, Control Systems Laboratory</h3><p>AAE 364 at Purdue. Fall 2026: 245 students in 15 lab sections.</p></div></li>
+      <li><time>Spring and Fall 2026</time><div><h3>Head TA, Control Systems Laboratory</h3><p>AAE 36401 at Purdue. Fall 2026: 245 students in 15 lab sections.</p></div></li>
       <li><time>Jan 2026 – now</time><div><h3>Graduate Research Assistant</h3><p>Purdue UAS Research and Test Facility, with Prof. James Goppert. Multi-camera drone tracking, then camera calibration from flight logs.</p></div></li>
       <li><time>Aug 2025 – now</time><div><h3>M.S. Aeronautics and Astronautics</h3><p>Purdue University, West Lafayette. Major in Autonomy and Control.</p></div></li>
       <li><time>2020 – 2025</time><div><h3>IIT Bombay</h3><p>Dual degree: Electrical Engineering and Control &amp; Computing. Valedictorian of the Control &amp; Computing group, 2025.</p></div></li>
@@ -644,4 +645,74 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 })();
 </script>
 
+<script>
+/* Cursor: a 12 px dot on the pointer and a 2 px line that trails behind it for about half a second, as on dschool.stanford.edu.
+   The colour follows the page: the accent blue of the section under the pointer (light blue on the dark panels, the nav and in dark mode, deep blue on light bands).
+   One canvas, drawn only while something moves. The normal arrow stays. Off on touch screens and when "reduce motion" is on. */
+(function () {
+  "use strict";
+  var mm = window.matchMedia;
+  if (!mm || !mm("(hover: hover) and (pointer: fine)").matches || mm("(prefers-reduced-motion: reduce)").matches) return;
+  var cv = document.createElement("canvas");
+  cv.setAttribute("aria-hidden", "true");
+  cv.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:3000";
+  document.body.appendChild(cv);
+  var ctx = cv.getContext("2d"), W = 0, H = 0, TRAIL = 450, R = 6, LINE = 2, MAXPTS = 160;
+  function size() {
+    var d = Math.min(2, window.devicePixelRatio || 1); W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  size(); window.addEventListener("resize", size);
+
+  var pts = [], x = -50, y = -50, inside = false, raf = 0, cur = null, cache = new WeakMap(), tokens = null;
+  function parse(c) {
+    var m; c = (c || "").trim();
+    if ((m = /^#([0-9a-f]{6})$/i.exec(c))) return [parseInt(m[1].slice(0, 2), 16), parseInt(m[1].slice(2, 4), 16), parseInt(m[1].slice(4, 6), 16)];
+    if ((m = /^#([0-9a-f]{3})$/i.exec(c))) return [parseInt(m[1][0] + m[1][0], 16), parseInt(m[1][1] + m[1][1], 16), parseInt(m[1][2] + m[1][2], 16)];
+    if ((m = /^rgba?\(([^)]+)\)/i.exec(c))) { var p = m[1].split(/[ ,\/]+/).map(Number); return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1]; }
+    return null;
+  }
+  function readTokens() {
+    var cs = getComputedStyle(document.documentElement);
+    tokens = { dark: parse(cs.getPropertyValue("--c-accent")) || [41, 151, 255], light: parse(cs.getPropertyValue("--accent")) || [0, 102, 204] };
+    cache = new WeakMap();
+  }
+  readTokens();
+  if (mm("(prefers-color-scheme: dark)").addEventListener) mm("(prefers-color-scheme: dark)").addEventListener("change", readTokens);
+  function bgUnder(el) {                       /* the first non-transparent background going up the tree */
+    for (; el && el.nodeType === 1; el = el.parentElement) {
+      var c = parse(getComputedStyle(el).backgroundColor);
+      if (c && (c[3] === undefined || c[3] > 0.5)) return c;
+    }
+    return [255, 255, 255];
+  }
+  function lum(c) { return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255; }
+  function accentFor(el) {
+    var v = cache.get(el); if (v) return v;
+    v = lum(bgUnder(el)) < 0.45 ? tokens.dark : tokens.light; cache.set(el, v); return v;
+  }
+  function note(e) {
+    x = e.clientX; y = e.clientY; inside = true; var now = performance.now();
+    var el = e.target && e.target.nodeType === 1 ? e.target : document.body; cur = accentFor(el);
+    pts.push({ x: x, y: y, t: now }); if (pts.length > MAXPTS) pts.shift();
+    if (!raf) raf = requestAnimationFrame(draw);
+  }
+  document.addEventListener("mousemove", note, { passive: true });
+  document.documentElement.addEventListener("mouseleave", function () { inside = false; if (!raf) raf = requestAnimationFrame(draw); });
+  document.documentElement.addEventListener("mouseenter", function () { inside = true; });
+
+  function draw(now) {
+    raf = 0; ctx.clearRect(0, 0, W, H);
+    while (pts.length && now - pts[0].t > TRAIL) pts.shift();
+    var rgb = cur ? Math.round(cur[0]) + "," + Math.round(cur[1]) + "," + Math.round(cur[2]) : "0,102,204";
+    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineWidth = LINE;
+    for (var i = 1; i < pts.length; i++) {
+      var a = pts[i - 1], b = pts[i], alpha = 1 - (now - b.t) / TRAIL; if (alpha <= 0) continue;
+      ctx.strokeStyle = "rgba(" + rgb + "," + alpha.toFixed(3) + ")"; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    }
+    if (inside) { ctx.fillStyle = "rgb(" + rgb + ")"; ctx.beginPath(); ctx.arc(x, y, R, 0, 6.2832); ctx.fill(); }
+    if (pts.length) raf = requestAnimationFrame(draw);
+  }
+})();
+</script>
 </body></html>
