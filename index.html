@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style><title>Siddharth Anand</title>
+<meta name="description" content="Siddharth Anand: perception and state estimation for aerial systems. M.S. student at Purdue.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="canonical" href="https://siddharth2511.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Siddharth Anand">
+<meta property="og:title" content="Siddharth Anand: perception and state estimation for aerial systems">
+<meta property="og:description" content="Graduate student at Purdue. I calibrate networks of cheap cameras using the flight logs of the drones they track.">
+<meta property="og:url" content="https://siddharth2511.github.io/">
+<meta property="og:image" content="https://siddharth2511.github.io/assets/purt-hangar.jpg">
+<meta property="og:image:alt" content="The PURT motion-capture hangar at Purdue">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230066cc'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-size='28' font-weight='700' fill='white' text-anchor='middle'%3ESA%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<style>
+/* Layout concept: a product-launch scroll. Black "cinema" panels carry the research, light bands carry the record.
+   One accent (blue), large tightly tracked type, rounded tiles, a frosted sticky nav. Original code and copy. */
+:root{
+  --bg:#ffffff; --bg2:#f5f5f7; --fg:#1d1d1f; --muted:#6e6e73; --line:rgba(0,0,0,.14);
+  --accent:#0066cc; --tile:#f5f5f7; --tile2:#ffffff; --tile-fg:#1d1d1f;
+  --btn:#0071e3; --btn-fg:#ffffff;
+  /* cinema panels are dark in every theme */
+  --c-bg:#000000; --c-bg2:#141416; --c-fg:#f5f5f7; --c-muted:#a1a1a6; --c-line:rgba(255,255,255,.18);
+  --c-accent:#2997ff; --c-warm:#ff9f0a; --c-track:rgba(255,255,255,.1);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",Roboto,system-ui,sans-serif;
+  --r:28px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --bg2:#0f0f11; --fg:#f5f5f7; --muted:#a1a1a6; --line:rgba(255,255,255,.18);
+    --accent:#2997ff; --tile:#1c1c1e; --tile2:#1c1c1e; --tile-fg:#f5f5f7; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --bg2:#0f0f11; --fg:#f5f5f7; --muted:#a1a1a6; --line:rgba(255,255,255,.18);
+  --accent:#2997ff; --tile:#1c1c1e; --tile2:#1c1c1e; --tile-fg:#f5f5f7; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--fg);font:400 17px/1.47 var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+img{display:block;max-width:100%;height:auto}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+button{font-family:inherit}
+section[id]{scroll-margin-top:56px}
+
+/* cinema panels re-point the tokens so everything inside reads light-on-dark */
+.cinema{--bg:var(--c-bg);--fg:var(--c-fg);--muted:var(--c-muted);--line:var(--c-line);--accent:var(--c-accent);background:var(--c-bg);color:var(--c-fg)}
+
+.wrap{width:100%;max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(0,0,0,.94);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--c-line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:48px;gap:16px}
+.brand{font-weight:600;font-size:15px;letter-spacing:-.01em;color:var(--c-fg)}
+.brand:hover{text-decoration:none}
+.nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;margin-left:auto}
+.nav ul a{color:var(--c-fg);opacity:.78;font-size:13px}
+.nav ul a:hover,.nav ul a.on{opacity:1;text-decoration:none}
+.pill{display:inline-flex;align-items:center;padding:6px 14px;border-radius:980px;background:var(--btn);color:var(--btn-fg);font-size:13px;font-weight:500;white-space:nowrap}
+.pill:hover{text-decoration:none;filter:brightness(1.08)}
+@media(max-width:760px){.nav ul{display:none}}
+
+/* hero */
+.hero{padding-top:clamp(48px,9vw,112px);padding-bottom:clamp(40px,6vw,80px);text-align:center}
+.eyebrow{font-size:clamp(14px,1.6vw,19px);font-weight:600;color:var(--muted);margin:0 0 14px}
+h1{font-size:clamp(38px,7vw,76px);line-height:1.04;letter-spacing:-.035em;font-weight:700;margin:0 auto;max-width:17ch;text-wrap:balance}
+.grad{background:linear-gradient(90deg,#b5d6ff 0%,#8dc3ff 45%,#7fe0cf 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.lede{font-size:clamp(18px,2.1vw,24px);line-height:1.35;color:var(--muted);max-width:44ch;margin:22px auto 0;text-wrap:pretty}
+.cta{display:flex;gap:10px 30px;justify-content:center;flex-wrap:wrap;margin:26px 0 0;font-size:clamp(17px,2vw,21px)}
+.cta a::after,.more::after{content:" \203A"}
+.scene{margin:clamp(32px,6vw,64px) auto 0;position:relative;border-radius:var(--r);overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,#10233f 0%,#06080d 58%,#000 100%);border:1px solid var(--c-line);text-align:left}
+#scene{display:block;width:100%;height:clamp(280px,44vw,500px)}
+.scene figcaption{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;font-size:13px;color:var(--c-muted);pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.08);color:var(--c-fg);font-weight:500}
+.chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c-warm);transition:background .4s}
+.chip[data-s="2"]::before{background:var(--c-accent)}
+.readout{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* bands, headings */
+.band{padding-block:clamp(56px,9vw,112px)}
+.alt{background:var(--bg2)}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px 24px;flex-wrap:wrap;margin-bottom:clamp(20px,3vw,36px)}
+h2{font-size:clamp(30px,5.2vw,56px);line-height:1.07;letter-spacing:-.028em;font-weight:700;margin:0;text-wrap:balance}
+.sub{font-size:clamp(18px,2vw,23px);line-height:1.35;color:var(--muted);max-width:48ch;margin:0;text-wrap:pretty}
+.more{font-size:clamp(16px,1.8vw,19px);white-space:nowrap}
+
+/* highlight tiles */
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.tile{grid-column:span 6;border-radius:var(--r);padding:clamp(24px,3.4vw,44px);background:var(--tile2);color:var(--tile-fg);min-width:0;display:flex;flex-direction:column;gap:12px;min-height:clamp(250px,30vw,360px)}
+.tile.s7{grid-column:span 7}
+.tile.s5{grid-column:span 5}
+.tile.dark{background:var(--c-bg);color:var(--c-fg);--muted:var(--c-muted)}
+@media(max-width:820px){.tile,.tile.s7,.tile.s5{grid-column:1/-1;min-height:0}}
+.kicker{font-size:14px;font-weight:600;color:var(--muted);margin:0}
+.tile p.bignum .unit{font-size:.3em;font-weight:600;letter-spacing:-.01em;margin-left:.22em}
+.tile p.bignum{font-size:clamp(56px,10vw,116px);font-weight:700;letter-spacing:-.045em;line-height:1;margin:auto 0 0;opacity:1;max-width:none}
+.tile h3{font-size:clamp(26px,3.6vw,40px);line-height:1.1;letter-spacing:-.022em;margin:auto 0 0;font-weight:700;text-wrap:balance}
+.tile p{margin:0;font-size:clamp(17px,1.9vw,21px);line-height:1.36;opacity:.84;max-width:36ch;text-wrap:pretty}
+
+/* research explorer */
+.explorer{display:grid;grid-template-columns:minmax(0,250px) minmax(0,1fr);gap:clamp(20px,4vw,56px);margin-top:clamp(24px,4vw,48px);align-items:start}
+.pills{display:flex;flex-direction:column;gap:10px}
+.pillbtn{display:block;text-align:left;font:600 16px/1.2 var(--font);color:var(--c-fg);background:var(--c-bg2);border:1px solid transparent;border-radius:980px;padding:13px 20px;cursor:pointer;transition:background .2s,color .2s}
+.pillbtn:hover{background:#26262a}
+.pillbtn[aria-selected="true"]{background:var(--c-fg);color:var(--c-bg)}
+@media(max-width:820px){
+  .explorer{grid-template-columns:minmax(0,1fr)}
+  .pills{flex-direction:row;overflow-x:auto;padding-bottom:6px;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
+  .pills::-webkit-scrollbar{display:none}
+  .pillbtn{white-space:nowrap;flex:0 0 auto}
+}
+.pane{background:var(--c-bg2);border-radius:var(--r);padding:clamp(20px,3.4vw,40px);min-width:0}
+.pane h3{font-size:clamp(24px,3.2vw,36px);letter-spacing:-.022em;line-height:1.12;margin:0 0 12px;font-weight:700;text-wrap:balance}
+.pane p{color:var(--muted);font-size:clamp(16px,1.8vw,19px);line-height:1.42;margin:0 0 18px;max-width:54ch}
+.fig{display:block;width:100%;height:auto;max-width:640px}
+.fig text{font-family:var(--font);fill:var(--c-muted);font-size:14px}
+.fig .hl{fill:var(--c-fg);font-weight:600}
+.fig .acc{fill:var(--c-accent);font-weight:600}
+.fig .warm{fill:var(--c-warm);font-weight:600}
+.small{font-size:13px;color:var(--muted);margin:14px 0 0;max-width:60ch}
+.points{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:12px;max-width:56ch}
+.points li{position:relative;padding-left:22px;font-size:clamp(16px,1.8vw,19px);line-height:1.4;color:var(--c-fg)}
+.points li::before{content:"";position:absolute;left:0;top:.55em;width:8px;height:8px;border-radius:50%;background:var(--c-accent)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin:10px 0 0;padding:0;list-style:none;font-size:15px;color:var(--c-fg)}
+.legend li{display:flex;align-items:center;gap:8px}
+.legend i{display:inline-block;width:22px;height:4px;border-radius:2px}
+@media(max-width:560px){.fig text{font-size:17px}}
+.pane p.small{font-size:13px;margin:14px 0 0}
+.bars{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:14px}
+.bars li{display:grid;grid-template-columns:minmax(0,210px) minmax(0,1fr) 72px;gap:12px;align-items:center;font-size:15px;color:var(--c-fg)}
+.bars .track{height:12px;border-radius:99px;background:var(--c-track);overflow:hidden}
+.bars .bar{display:block;height:100%;width:var(--w);border-radius:99px;background:var(--c-warm)}
+.bars .good .bar{background:var(--c-accent)}
+.bars .val{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.bars .axis{margin-top:-4px}
+.bars .ticks{position:relative;height:18px;font-size:12px;color:var(--c-muted)}
+.bars .ticks b{position:absolute;top:0;transform:translateX(-50%);font-weight:500;white-space:nowrap}
+.bars .ticks b:first-child{transform:none}
+.bars .ticks b:last-child{transform:translateX(-100%)}
+@media(max-width:560px){.bars li.axis{grid-template-columns:minmax(0,1fr)}.bars li.axis>span:not(.ticks){display:none}}
+@media(max-width:560px){.bars li{grid-template-columns:minmax(0,1fr) auto}.bars .track{grid-column:1/-1;order:3}}
+.switch{display:inline-flex;align-items:center;gap:12px;cursor:pointer;font-weight:600;font-size:16px;color:var(--c-fg);margin:2px 0 14px;user-select:none}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch .knob{position:relative;width:52px;height:30px;border-radius:99px;background:#3a3a3e;transition:background .25s;flex:none}
+.switch .knob::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .25s}
+.switch input:checked + .knob{background:var(--c-accent)}
+.switch input:checked + .knob::after{transform:translateX(22px)}
+.switch input:focus-visible + .knob{outline:2px solid var(--c-accent);outline-offset:3px}
+.rays .ray{transform:rotate(var(--d));transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.rays .ray line{stroke:var(--c-warm);stroke-width:2;transition:stroke .6s}
+.rays.on .ray{transform:rotate(0deg)}
+.rays.on .ray line{stroke:var(--c-accent)}
+.rays .ground{stroke:var(--c-line);stroke-width:1}
+.rays .camg{fill:var(--c-fg)}
+.rays .dr{fill:var(--c-fg)}
+.bleed{margin:clamp(28px,5vw,56px) 0 0;border-radius:var(--r);overflow:hidden;position:relative;background:var(--c-bg2)}
+.bleed img{width:100%;height:clamp(220px,40vw,460px);object-fit:cover;opacity:.92}
+.bleed figcaption{position:absolute;left:0;right:0;bottom:0;padding:48px clamp(18px,3vw,36px) clamp(16px,2.4vw,28px);background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.78));font-size:clamp(15px,1.7vw,19px);color:var(--c-fg)}
+.bleed figcaption span{display:block;max-width:62ch}
+.bleed figcaption b{font-weight:600}
+
+/* projects rail */
+.arrows{display:flex;gap:10px}
+.arrow{width:42px;height:42px;border-radius:50%;border:0;background:var(--tile);color:var(--tile-fg);font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0 0 3px}
+.arrow:disabled{opacity:.35;cursor:default}
+.rail{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-block:6px 30px;padding-left:max(16px,env(safe-area-inset-left,0px),calc((100vw - 1120px)/2 + 16px));padding-right:max(16px,env(safe-area-inset-right,0px),calc((100vw - 1120px)/2 + 16px));scroll-padding-inline:max(16px,env(safe-area-inset-left,0px),calc((100vw - 1120px)/2 + 16px));scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.rail::-webkit-scrollbar{display:none}
+.card{flex:0 0 min(84vw,372px);scroll-snap-align:start;background:var(--tile);color:var(--tile-fg);border-radius:var(--r);padding:28px 28px 26px;display:flex;flex-direction:column;gap:12px;min-height:430px}
+.card h3{font-size:28px;line-height:1.1;letter-spacing:-.022em;margin:2px 0 0;font-weight:700;text-wrap:balance}
+.card p{margin:0;opacity:.84;font-size:17px;line-height:1.4}
+.card .tags{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap;padding-top:10px}
+.tag{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(127,127,127,.18);color:var(--muted)}
+.card .go{font-weight:500;font-size:15px}
+.card.feature{background:var(--c-bg);color:var(--c-fg);--muted:var(--c-muted);--accent:var(--c-accent)}
+
+/* timeline */
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:6px 32px;padding:22px 0;border-top:1px solid var(--line)}
+.timeline li:last-child{border-bottom:1px solid var(--line)}
+.timeline time{font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums}
+.timeline h3{font-size:22px;letter-spacing:-.015em;margin:0 0 4px;font-weight:600}
+.timeline p{margin:0;color:var(--muted);font-size:17px;max-width:62ch}
+@media(max-width:640px){.timeline li{grid-template-columns:minmax(0,1fr)}}
+
+/* story */
+.story{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(24px,5vw,72px);align-items:start}
+.story h3{font-size:clamp(24px,3.1vw,34px);line-height:1.15;letter-spacing:-.02em;font-weight:700;margin:0 0 10px;text-wrap:balance}
+.story p{color:var(--muted);font-size:clamp(17px,1.9vw,20px);line-height:1.45;margin:0 0 36px;max-width:52ch}
+.photos{display:grid;gap:16px;position:sticky;top:72px}
+.photo{margin:0;border-radius:24px;overflow:hidden;background:var(--tile)}
+.photo img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.photo figcaption{padding:12px 16px;font-size:14px;color:var(--muted)}
+@media(max-width:860px){.story{grid-template-columns:minmax(0,1fr)}.photos{position:static}}
+
+/* contact */
+.contact{text-align:center}
+.contact h2{margin:0 auto 14px}
+.email{font-size:clamp(19px,2.6vw,28px);font-weight:600;letter-spacing:-.012em;margin:26px 0 0;word-break:break-word}
+.links{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:980px;background:var(--btn);color:var(--btn-fg);font-size:17px;font-weight:500;border:0;cursor:pointer;font-family:inherit}
+.btn:hover{text-decoration:none;filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+footer{padding-block:26px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* a little motion, never needed to read anything */
+@supports (animation-timeline: view()){
+  .reveal{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
+  @keyframes rise{from{transform:translateY(22px)}to{transform:none}}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{animation:none!important}
+  .rays .ray,.switch .knob,.switch .knob::after{transition:none}
+}
+</style>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap">
+    <a class="brand" href="#top">Siddharth Anand</a>
+    <ul>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#path">Path</a></li>
+      <li><a href="#story">Story</a></li>
+    </ul>
+    <a class="pill" href="#contact">Get in touch</a>
+  </div>
+</nav>
+
+<header class="hero cinema" id="top">
+  <div class="wrap">
+    <p class="eyebrow">Siddharth Anand · Purdue University</p>
+    <h1>Perception and state estimation for <span class="grad">aerial systems.</span></h1>
+    <p class="lede">I’m a graduate student at Purdue. My current research calibrates networks of cheap cameras using the flight logs of the drones they track.</p>
+    <p class="cta"><a href="#research">See the research</a><a href="#contact">Get in touch</a></p>
+    <figure class="scene" style="margin-bottom:0">
+      <canvas id="scene" role="img" aria-label="Animation. Four cameras start with wrong estimates of where they point, so their rays miss a drone flying a figure eight. The drone’s flight log pulls the rays together until they meet at the drone."></canvas>
+      <figcaption><span class="chip" id="phase" data-s="0">Camera poses unknown</span><span class="readout" id="readout">pointing error 12.3°</span></figcaption>
+    </figure>
+    <p class="small" style="text-align:center;margin:14px auto 0">An illustration of the idea, not data. The readout is the average pointing error of the four cameras.</p>
+  </div>
+</header>
+
+<section class="band alt" id="highlights" aria-labelledby="hl">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2 id="hl">Highlights.</h2></div>
+    <div class="grid">
+      <article class="tile dark s7 reveal">
+        <p class="kicker">Why it matters</p>
+        <p class="bignum">9–28×</p>
+        <p>worse drone tracking when every camera’s pose is off by 5° and 30 cm, measured against motion capture on real hardware with offline bundle adjustment: centimetres become about a metre.</p>
+      </article>
+      <article class="tile s5 reveal">
+        <p class="kicker">Now</p>
+        <h3>Calibrating cameras from a drone’s own flight log.</h3>
+        <p>A joint effort with computer-vision researchers: they detect the drone, I work out where the cameras are.</p>
+      </article>
+      <article class="tile s5 reveal">
+        <p class="kicker">Teaching</p>
+        <p class="bignum">245<span class="unit">students</span></p>
+        <p>Head TA for the Control Systems Laboratory at Purdue, Fall 2026: 15 lab sections of up to 18 students.</p>
+      </article>
+      <article class="tile dark s7 reveal">
+        <p class="kicker">Before Purdue</p>
+        <h3>Valedictorian, Control &amp; Computing.</h3>
+        <p>IIT Bombay dual degree in Electrical Engineering and Control &amp; Computing, 2025, with a semester at KAIST in 2023.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band cinema" id="research" aria-labelledby="rh">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2 id="rh">Letting the drone<br>teach the cameras.</h2><a class="more" href="#work">The work</a></div>
+    <p class="sub reveal">Phone cameras can track a drone well only if they know exactly where they are. In the field there is no motion-capture rig and no calibration wand. Every flight does have one thing: the drone’s own navigation log. I turn that log into a calibration target, and work out which flights teach the most.</p>
+
+    <div class="explorer">
+      <div class="pills" role="tablist" aria-label="Four ideas from the research">
+        <button class="pillbtn" role="tab" id="tab-pose" aria-controls="pane-pose" aria-selected="true">Why pose matters</button>
+        <button class="pillbtn" role="tab" id="tab-rays" aria-controls="pane-rays" aria-selected="false" tabindex="-1">Making rays meet</button>
+        <button class="pillbtn" role="tab" id="tab-fly" aria-controls="pane-fly" aria-selected="false" tabindex="-1">Designing the flight</button>
+        <button class="pillbtn" role="tab" id="tab-log" aria-controls="pane-log" aria-selected="false" tabindex="-1">What limits it</button>
+      </div>
+      <div class="panes">
+        <div class="pane" role="tabpanel" id="pane-pose" aria-labelledby="tab-pose">
+          <h3>A rotation error costs the same pixels at any range.</h3>
+          <p>A camera measures angles. A 5° error in the camera’s extrinsic rotation moves every pixel by the same amount whether the drone is 10 m or 100 m away. A 30 cm error in its position fades with distance. The rotation is the part that has to be right.</p>
+          <div id="chart-pose"></div>
+          <p class="small">A 4K phone camera, focal length about 2,700 px. First-order geometry. Measured on hardware: 5° and 30 cm in every camera makes tracking 9–28× worse.</p>
+        </div>
+        <div class="pane" role="tabpanel" id="pane-rays" aria-labelledby="tab-rays" hidden>
+          <h3>Matching the log is not enough.</h3>
+          <p>If cameras are only asked to put the triangulated drone on its logged path, they can end up far from where they stand, with rays that miss the drone by hundreds of pixels. Adding one term that asks the rays to actually meet makes the answer unique.</p>
+          <label class="switch"><input type="checkbox" id="tri"><span class="knob" aria-hidden="true"></span><span>Ask the rays to meet</span></label>
+          <div id="chart-rays"></div>
+          <p class="small" id="rays-note" aria-live="polite">Off: the rays miss the drone, yet the triangulated point can still sit on the log.</p>
+        </div>
+        <div class="pane" role="tabpanel" id="pane-fly" aria-labelledby="tab-fly" hidden>
+          <h3>A hover teaches nothing about zoom.</h3>
+          <p>Zooming in and stepping closer look the same to a camera unless the drone changes distance. An estimation-theory analysis ranks flights: cover at least a 3× range of distances, and climb at both the near and the far distance.</p>
+          <ul class="bars">
+            <li><span>Hover at 30 m</span><span class="track"><span class="bar" style="--w:95.5%"></span></span><span class="val">57–77 %</span></li>
+            <li><span>Pass at constant distance</span><span class="track"><span class="bar" style="--w:77.5%"></span></span><span class="val">10–16 %</span></li>
+            <li class="good"><span>Circle at constant height</span><span class="track"><span class="bar" style="--w:32.5%"></span></span><span class="val">0.2 %</span></li>
+            <li class="good"><span>Out and back, with climbs</span><span class="track"><span class="bar" style="--w:32.5%"></span></span><span class="val">0.2 %</span></li>
+            <li class="good"><span>Zig-zag across two distances, climbing</span><span class="track"><span class="bar" style="--w:31.4%"></span></span><span class="val">0.18 %</span></li>
+            <li class="axis" aria-hidden="true"><span></span><span class="ticks"><b style="left:0">0.01 %</b><b style="left:25%">0.1 %</b><b style="left:50%">1 %</b><b style="left:75%">10 %</b><b style="left:100%">100 %</b></span><span></span></li>
+          </ul>
+          <p class="small">Uncertainty in focal length on a log scale (shorter is better) for a 60 s flight seen by three cameras, at the middle of each range. A Cramér–Rao bound, not a measured error.</p>
+        </div>
+        <div class="pane" role="tabpanel" id="pane-log" aria-labelledby="tab-log" hidden>
+          <h3>The log has errors too.</h3>
+          <p>The drone’s altitude comes from a barometer. A barometer error that grows with height looks exactly like an error in every camera’s roll and pitch angles, and the offset changes at every power-up. The cameras can only be as right as the log they are fitted to, so I always report the raw error next to the offset-removed one.</p>
+          <ul class="points">
+            <li>The phones’ accelerometers show the cameras did not move between flights, so the apparent roll and pitch change most likely comes from the log.</li>
+            <li>On the 10 September flights, most of the error left after calibration was vertical.</li>
+            <li>Next: flights that change height independently of distance.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <figure class="bleed">
+      <img src="assets/purt-hangar.jpg" alt="The PURT motion-capture hangar: tripod-mounted cameras with motion-capture pucks standing on a large concrete floor." loading="lazy" decoding="async" width="1200" height="850">
+      <figcaption><span><b>The PURT hangar.</b> Motion capture gives millimetre truth, which is how I know when a calibration is right before taking it to a field.</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="band" id="work" aria-labelledby="wh" style="padding-bottom:clamp(36px,6vw,72px)">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="wh">The work.</h2>
+      <div class="arrows"><button class="arrow" id="prev" aria-label="Previous project" disabled>&#8249;</button><button class="arrow" id="next" aria-label="Next project">&#8250;</button></div>
+    </div>
+  </div>
+  <div class="rail" id="rail" tabindex="0" aria-label="Projects. Scroll sideways.">
+    <article class="card feature">
+      <p class="kicker">Research · Purdue, 2026–</p>
+      <h3>Phone cameras that calibrate from a drone’s flight log</h3>
+      <p>Pose, focal length and clock for every camera from one flight, with flight-design rules from an estimation-theory analysis. A paper on the offline work is in preparation.</p>
+      <a class="go" href="#research">Explore the research ›</a>
+      <div class="tags"><span class="tag">Bundle adjustment</span><span class="tag">Lie groups</span><span class="tag">Cramér–Rao</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Course project · Spring 2026</p>
+      <h3>How much does camera pose matter?</h3>
+      <p>Lie-group particle and Kalman filters tracking a drone with several cameras, tested in simulation, in a digital twin and on motion-capture hardware. A 5° and 0.30 m pose error makes tracking 9–28× worse, with an online filter or with offline bundle adjustment.</p>
+      <a class="go" href="https://github.com/Siddharth2511/AAE590-Lie-Group-Methods-for-Estimation-and-Control" target="_blank" rel="noopener">View on GitHub ›</a>
+      <div class="tags"><span class="tag">Python</span><span class="tag">SE(3)</span><span class="tag">EKF</span><span class="tag">Particle filter</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Lab infrastructure</p>
+      <h3>A digital twin of the PURT rig</h3>
+      <p>A validated Gazebo model of the lab’s three-camera drone-tracking rig, used to reproduce the lab’s experiments in simulation.</p>
+      <a class="go" href="https://github.com/Siddharth2511/purt-gazebo-twin" target="_blank" rel="noopener">View on GitHub ›</a>
+      <div class="tags"><span class="tag">ROS 2</span><span class="tag">Gazebo</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Dual-degree project · IIT Bombay, 2024–25</p>
+      <h3>Anti-drone pursuit–evasion</h3>
+      <p>A pursuer drone that keeps an evader in view with camera-guided gimbal control and a 3D Voronoi chase strategy, simulated in Cosys-AirSim and Unreal Engine 5.4. Supervised by Prof. Debraj Chakraborty.</p>
+      <a class="go" href="https://github.com/Siddharth2511/pursuit-evasion-drone" target="_blank" rel="noopener">View on GitHub ›</a>
+      <div class="tags"><span class="tag">Python</span><span class="tag">AirSim</span><span class="tag">Unreal Engine</span><span class="tag">PID</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Course · Fall 2025</p>
+      <h3>Estimation and Controls Lab</h3>
+      <p>Six labs from rover motion to formation control, blimp altitude and heading control, and a final chaser–evader mission, in MATLAB and Simulink.</p>
+      <a class="go" href="https://github.com/Siddharth2511/AAE590-Estimation-and-Control-Lab" target="_blank" rel="noopener">View on GitHub ›</a>
+      <div class="tags"><span class="tag">MATLAB</span><span class="tag">Simulink</span><span class="tag">Control</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Internship · ideaForge, summer 2022</p>
+      <h3>Stabilizing a camera payload</h3>
+      <p>Model-based and reinforcement-learning approaches to stabilizing pan-tilt-zoom payloads on UAVs, plus line-of-sight optimization for drone mapping. Guided by Prof. Debraj Chakraborty.</p>
+      <div class="tags"><span class="tag">Control</span><span class="tag">Reinforcement learning</span><span class="tag">UAV</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Internship · HireQuotient, summer 2024</p>
+      <h3>An AI agent for recruiting</h3>
+      <p>A document-grounded chatbot on a vector database, and a generative-AI outreach system that deletes, enriches and triggers outreach from prompts, with backend work in JavaScript.</p>
+      <div class="tags"><span class="tag">OpenAI agents</span><span class="tag">MongoDB</span><span class="tag">Node.js</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Internship · rupyy (CarDekho Group), summer 2023</p>
+      <h3>Data pipelines in the cloud</h3>
+      <p>An ETL pipeline from RDS to S3 with batch and streaming on AWS Lambda, and an LLM (FLAN-T5) system that answers questions from PDFs.</p>
+      <div class="tags"><span class="tag">AWS</span><span class="tag">Python</span><span class="tag">LLM</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Research exposition · IIT Bombay, 2024</p>
+      <h3>Active learning with core-sets</h3>
+      <p>Core-set selection with VGG features on CIFAR-10 and CRC-VAL-HE-7K: 81.3% test accuracy at batch size 256 after 50 epochs. Supervised by Prof. Amit Sethi.</p>
+      <div class="tags"><span class="tag">Deep learning</span><span class="tag">Active learning</span></div>
+    </article>
+    <article class="card">
+      <p class="kicker">Student team · IIT Bombay, 2021–22</p>
+      <h3>Team Veloce Hyperloop</h3>
+      <p>Control architecture for a Hyperloop pod, including sensor fusion and communication protocols. Selected among the top teams in the Stage-1 documentation review at European Hyperloop Week.</p>
+      <div class="tags"><span class="tag">Control</span><span class="tag">Sensor fusion</span></div>
+    </article>
+  </div>
+</section>
+
+<section class="band alt" id="path" aria-labelledby="ph">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2 id="ph">The path.</h2></div>
+    <ol class="timeline">
+      <li><time>Spring and Fall 2026</time><div><h3>Head TA, Control Systems Laboratory</h3><p>AAE 364 at Purdue. Fall 2026: 245 students in 15 lab sections.</p></div></li>
+      <li><time>Jan 2026 – now</time><div><h3>Graduate Research Assistant</h3><p>Purdue UAS Research and Test Facility, with Prof. James Goppert. Multi-camera drone tracking, then camera calibration from flight logs.</p></div></li>
+      <li><time>Aug 2025 – now</time><div><h3>M.S. Aeronautics and Astronautics</h3><p>Purdue University, West Lafayette. Major in Autonomy and Control.</p></div></li>
+      <li><time>2020 – 2025</time><div><h3>IIT Bombay</h3><p>Dual degree: Electrical Engineering and Control &amp; Computing. Valedictorian of the Control &amp; Computing group, 2025.</p></div></li>
+      <li><time>May – Jul 2024</time><div><h3>AI Engineer Intern, HireQuotient</h3><p>AI agents, vector search and outreach automation.</p></div></li>
+      <li><time>2023</time><div><h3>Exchange semester, KAIST</h3><p>One of two Indian students selected. Also a summer as Cloud Computing Intern at rupyy (CarDekho Group).</p></div></li>
+      <li><time>May – Jul 2022</time><div><h3>R&amp;D Software and Control Intern, ideaForge</h3><p>Camera-payload stabilization for UAVs.</p></div></li>
+      <li><time>2021 – 2022</time><div><h3>Team Veloce Hyperloop and the department newsletter</h3><p>Control architecture for the pod, and lead panelist for the Electrical Engineering newsletter.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band" id="story" aria-labelledby="sh">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2 id="sh">How I got here.</h2></div>
+    <div class="story">
+      <div>
+        <h3>Rigor, then applications.</h3>
+        <p>At IIT Bombay I specialized in Control &amp; Computing, in Electrical Engineering. The coursework was rigorous and I enjoyed it, but I wanted applications. I think of myself more as an applied engineer than a pure theorist.</p>
+        <h3>A mentor.</h3>
+        <p>Prof. Debraj Chakraborty taught my controls course, gave me the chance to intern at ideaForge, and later supervised my dual-degree project on anti-drone pursuit–evasion. A lot of my philosophy and research style comes from him.</p>
+        <h3>Purdue.</h3>
+        <p>I came to work on autonomy and control of aerial vehicles and joined Prof. James Goppert’s group. I started with how camera pose affects tracking, using Lie-group methods. Now I work on calibrating phone cameras from a drone’s own flight log, alongside computer-vision researchers. I also maintain the team’s data repository.</p>
+        <h3>What’s next.</h3>
+        <p>Next is a paper on the offline work, then online estimation with PTZ cameras, where the extrinsic angles and the zoom change over time. For me, research is a response to an inherent calling: my contribution to society.</p>
+      </div>
+      <div class="photos">
+        <figure class="photo reveal"><img src="assets/goppert-canoe.jpg" alt="Siddharth Anand and Prof. James Goppert in life jackets on a river, both giving a thumbs up, with a fallen tree behind them." loading="lazy" decoding="async" width="1600" height="1200"><figcaption>With Prof. James Goppert, September 2026.</figcaption></figure>
+        <figure class="photo reveal"><img src="assets/group-canoe.jpg" alt="Members of the research group in canoes on a river, with a road bridge in the background." loading="lazy" decoding="async" width="1600" height="1200"><figcaption>The research group on the river, September 2026.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band cinema contact" id="contact" aria-labelledby="ch">
+  <div class="wrap">
+    <h2 id="ch">Let’s talk.</h2>
+    <p class="sub" style="margin-inline:auto">Happy to talk about research and engineering roles in perception, estimation and autonomy for aerial systems.</p>
+    <p class="email" id="email">siddharthanand2511@gmail.com</p>
+    <div class="links">
+      <a class="btn" id="mail" href="mailto:siddharthanand2511@gmail.com">Email me</a>
+      <button class="btn ghost" id="copy" type="button">Copy address</button>
+      <a class="btn ghost" href="https://www.linkedin.com/in/siddharthanand25/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn ghost" href="https://github.com/Siddharth2511" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer class="cinema">
+  <div class="wrap"><span>© 2026 Siddharth Anand</span><span>Last updated 22 October 2026</span></div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function ease(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+  var WARM = [255, 159, 10], ACC = [41, 151, 255];
+  function mix(t, a) {
+    return "rgba(" + Math.round(lerp(WARM[0], ACC[0], t)) + "," + Math.round(lerp(WARM[1], ACC[1], t)) + "," + Math.round(lerp(WARM[2], ACC[2], t)) + "," + a + ")";
+  }
+
+  /* ---------- hero scene: wrong cameras, a drone, a log ---------- */
+  var cv = $("#scene");
+  if (cv && cv.getContext) {
+    var ctx = cv.getContext("2d"), W = 0, H = 0, alive = true, shown = -1;
+    var T = 14, LABELS = ["Camera poses unknown", "Solving from the drone’s flight log", "Calibrated: the rays meet"];
+    var cams = [{ x: 0.14, e: -15, n: "cam1" }, { x: 0.38, e: 10, n: "cam2" }, { x: 0.62, e: -7, n: "cam3" }, { x: 0.86, e: 17, n: "cam4" }];
+    var chip = $("#phase"), read = $("#readout");
+    var mean = 0; cams.forEach(function (c) { mean += Math.abs(c.e); }); mean /= cams.length;
+    function size() {
+      var r = cv.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1);
+      W = Math.max(280, r.width); H = r.height || 300;
+      cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0);
+    }
+    function drone(t) { var w = 2 * Math.PI / 9; return { x: (0.5 + 0.3 * Math.sin(w * t)) * W, y: (0.36 + 0.14 * Math.sin(2 * w * t)) * H }; }
+    function prog(c) {
+      if (c < 3.2) return 0; if (c < 8) return ease((c - 3.2) / 4.8); if (c < 12.4) return 1;
+      if (c < 13.6) return 1 - ease((c - 12.4) / 1.2); return 0;
+    }
+    function stage(c) { return c < 3.2 ? 0 : c < 8 ? 1 : c < 12.4 ? 2 : 0; }
+    function draw(t) {
+      var c = t % T, p = prog(c), gy = H * 0.9, D = drone(t), i, s = stage(c);
+      if (s !== shown) { shown = s; chip.textContent = LABELS[s]; chip.setAttribute("data-s", s); }
+      var err = Math.max(0.2, mean * (1 - p)); read.textContent = "pointing error " + err.toFixed(1) + "°";
+      ctx.clearRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(255,255,255,.14)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, gy + 0.5); ctx.lineTo(W, gy + 0.5); ctx.stroke();
+      ctx.save(); ctx.setLineDash([2, 7]); ctx.strokeStyle = "rgba(255,255,255,.13)"; ctx.lineWidth = 1.4; ctx.beginPath();
+      for (i = 0; i <= 120; i++) { var Q = drone(i / 120 * 9); if (i) ctx.lineTo(Q.x, Q.y); else ctx.moveTo(Q.x, Q.y); }
+      ctx.stroke(); ctx.restore();
+      var NT = 90, prevP = drone(t - 2.4);
+      for (i = 1; i <= NT; i++) {
+        var q = drone(t - 2.4 + 2.4 * i / NT), a = i / NT; ctx.strokeStyle = "rgba(190,215,255," + (a * 0.7).toFixed(3) + ")"; ctx.lineWidth = 0.6 + a * 2.2;
+        ctx.beginPath(); ctx.moveTo(prevP.x, prevP.y); ctx.lineTo(q.x, q.y); ctx.stroke(); prevP = q;
+      }
+      cams.forEach(function (cm) {
+        var cx = cm.x * W, dx = D.x - cx, dy = gy - D.y, ang = Math.atan2(dx, dy);
+        var wob = Math.sin(t * 1.3 + cm.x * 9) * 1.2 * (1 - p);
+        var a2 = ang + (cm.e * (1 - p) + wob) * Math.PI / 180, L = Math.hypot(dx, dy) * 1.18, half = 3.2 * Math.PI / 180;
+        ctx.fillStyle = mix(p, 0.1); ctx.beginPath(); ctx.moveTo(cx, gy);
+        ctx.lineTo(cx + Math.sin(a2 - half) * L, gy - Math.cos(a2 - half) * L); ctx.lineTo(cx + Math.sin(a2 + half) * L, gy - Math.cos(a2 + half) * L); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = mix(p, 0.85); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(cx, gy); ctx.lineTo(cx + Math.sin(a2) * L, gy - Math.cos(a2) * L); ctx.stroke();
+        ctx.fillStyle = "#f5f5f7"; ctx.beginPath(); ctx.moveTo(cx, gy - 9); ctx.lineTo(cx - 8, gy + 5); ctx.lineTo(cx + 8, gy + 5); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "rgba(245,245,247,.6)"; ctx.font = "500 12px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif"; ctx.textAlign = "center"; ctx.fillText(cm.n, cx, gy + 24);
+      });
+      if (p > 0.9) {
+        var g = ctx.createRadialGradient(D.x, D.y, 0, D.x, D.y, 34); g.addColorStop(0, "rgba(41,151,255," + (0.5 * (p - 0.9) * 10).toFixed(3) + ")"); g.addColorStop(1, "rgba(41,151,255,0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(D.x, D.y, 34, 0, 6.2832); ctx.fill();
+      }
+      ctx.strokeStyle = "#f5f5f7"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(D.x - 9, D.y - 9); ctx.lineTo(D.x + 9, D.y + 9); ctx.moveTo(D.x + 9, D.y - 9); ctx.lineTo(D.x - 9, D.y + 9); ctx.stroke();
+      ctx.fillStyle = "#f5f5f7";[[-9, -9], [9, 9], [9, -9], [-9, 9]].forEach(function (o) { ctx.beginPath(); ctx.arc(D.x + o[0], D.y + o[1], 3.4, 0, 6.2832); ctx.fill(); });
+    }
+    function still() { size(); draw(10); }
+    function loop(now) { if (alive) draw(now / 1000); window.requestAnimationFrame(loop); }
+    size();
+    if (reduce) { still(); window.addEventListener("resize", still); }
+    else {
+      window.addEventListener("resize", size);
+      if ("IntersectionObserver" in window) new IntersectionObserver(function (e) { alive = e[0].isIntersecting; }).observe(cv);
+      window.requestAnimationFrame(loop);
+    }
+  }
+
+  /* ---------- explorer: tabs ---------- */
+  var tabs = $$("[role=tab]");
+  function select(t, focus) {
+    tabs.forEach(function (x) {
+      var on = x === t; x.setAttribute("aria-selected", on ? "true" : "false"); x.tabIndex = on ? 0 : -1;
+      var pane = document.getElementById(x.getAttribute("aria-controls")); if (pane) pane.hidden = !on;
+    });
+    if (focus) t.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { select(t); });
+    t.addEventListener("keydown", function (e) {
+      var k = e.key, n = tabs.length, j = i;
+      if (k === "ArrowRight" || k === "ArrowDown") j = (i + 1) % n; else if (k === "ArrowLeft" || k === "ArrowUp") j = (i - 1 + n) % n; else if (k === "Home") j = 0; else if (k === "End") j = n - 1; else return;
+      e.preventDefault(); select(tabs[j], true);
+    });
+  });
+
+  /* ---------- chart: rotation error versus position error ---------- */
+  (function () {
+    var host = $("#chart-pose"); if (!host) return;
+    var f = 2732, phi = 5 * Math.PI / 180, rho = 0.3, X0 = 56, X1 = 466, Y0 = 280, Y1 = 22, Zmin = 2, Zmax = 330, Vmax = 680;
+    function X(z) { return X0 + (Math.log(z) - Math.log(Zmin)) / (Math.log(Zmax) - Math.log(Zmin)) * (X1 - X0); }
+    function Y(v) { return Y0 - v / Vmax * (Y0 - Y1); }
+    var s = '<svg class="fig" viewBox="0 0 480 330" role="img" aria-label="Image shift in pixels against range. A 5 degree rotation error shifts the image by about 238 pixels at every range. A 30 centimetre position error shifts it by 410 pixels at 2 metres and by under 2 pixels at 300 metres. The two are equal at 3.4 metres.">';
+    var g, i;
+    for (g = 0; g <= 600; g += 100) s += '<line x1="' + X0 + '" x2="' + X1 + '" y1="' + Y(g).toFixed(1) + '" y2="' + Y(g).toFixed(1) + '" stroke="rgba(255,255,255,.1)"/><text x="' + (X0 - 8) + '" y="' + (Y(g) + 4).toFixed(1) + '" text-anchor="end">' + g + '</text>';
+    [2, 5, 10, 20, 50, 100, 300].forEach(function (z) { s += '<text x="' + X(z).toFixed(1) + '" y="' + (Y0 + 20) + '" text-anchor="middle">' + z + '</text>'; });
+    s += '<rect x="' + X(8).toFixed(1) + '" y="' + Y1 + '" width="' + (X(76) - X(8)).toFixed(1) + '" height="' + (Y0 - Y1) + '" fill="rgba(41,151,255,.1)"/><text x="' + ((X(8) + X(76)) / 2).toFixed(1) + '" y="' + (Y1 + 16) + '" text-anchor="middle">typical test range</text>';
+    var d = ""; for (i = 0; i <= 80; i++) { var z = Zmin * Math.pow(Zmax / Zmin, i / 80); d += (i ? "L" : "M") + X(z).toFixed(1) + "," + Y(f * rho / z).toFixed(1); }
+    s += '<line x1="' + X0 + '" x2="' + X1 + '" y1="' + Y(f * phi).toFixed(1) + '" y2="' + Y(f * phi).toFixed(1) + '" stroke="var(--c-accent)" stroke-width="3"/>';
+    s += '<path d="' + d + '" fill="none" stroke="var(--c-fg)" stroke-width="3" stroke-linecap="round" opacity=".9"/>';
+    var zc = rho / phi; s += '<circle cx="' + X(zc).toFixed(1) + '" cy="' + Y(f * phi).toFixed(1) + '" r="5" fill="var(--c-fg)"/>';
+    s += '<text x="' + (X(zc) + 10).toFixed(1) + '" y="' + (Y(f * phi) - 12).toFixed(1) + '">equal at ' + zc.toFixed(1) + ' m</text>';
+    s += '<text x="' + ((X0 + X1) / 2) + '" y="' + (Y0 + 42) + '" text-anchor="middle">range to the drone (m, log scale)</text>';
+    s += '<text x="14" y="' + ((Y0 + Y1) / 2) + '" text-anchor="middle" transform="rotate(-90 14 ' + ((Y0 + Y1) / 2) + ')">image shift (px)</text></svg>';
+    s += '<ul class="legend"><li><i style="background:var(--c-accent)"></i>5° rotation error: the same shift at every range</li><li><i style="background:var(--c-fg)"></i>30 cm position error: fades with range</li></ul>';
+    host.innerHTML = s;
+  })();
+
+  /* ---------- diagram: rays that miss, rays that meet ---------- */
+  (function () {
+    var host = $("#chart-rays"); if (!host) return;
+    var cx = [84, 240, 396], cy = 252, dx = 262, dy = 84, miss = [10, -8, 12];
+    var s = '<svg class="fig rays" id="raysvg" viewBox="0 0 480 300" role="img" aria-label="Three cameras looking at a drone. With the switch off the three rays pass beside the drone. With it on they meet at the drone.">';
+    s += '<line class="ground" x1="20" x2="460" y1="' + (cy + 12) + '" y2="' + (cy + 12) + '"/>';
+    cx.forEach(function (x, i) {
+      var vx = dx - x, vy = dy - cy, k = 1.12;
+      s += '<g class="ray" style="--d:' + miss[i] + 'deg;transform-origin:' + x + 'px ' + cy + 'px"><line x1="' + x + '" y1="' + cy + '" x2="' + (x + vx * k).toFixed(1) + '" y2="' + (cy + vy * k).toFixed(1) + '"/></g>';
+      s += '<path class="camg" d="M' + x + ' ' + (cy - 8) + ' l-9 17 h18z"/><text x="' + x + '" y="' + (cy + 34) + '" text-anchor="middle">cam' + (i + 1) + '</text>';
+    });
+    s += '<g stroke="var(--c-fg)" stroke-width="2.2"><line x1="' + (dx - 9) + '" y1="' + (dy - 9) + '" x2="' + (dx + 9) + '" y2="' + (dy + 9) + '"/><line x1="' + (dx + 9) + '" y1="' + (dy - 9) + '" x2="' + (dx - 9) + '" y2="' + (dy + 9) + '"/></g>';
+    [[-9, -9], [9, 9], [9, -9], [-9, 9]].forEach(function (o) { s += '<circle class="dr" cx="' + (dx + o[0]) + '" cy="' + (dy + o[1]) + '" r="3.6"/>'; });
+    s += '<g stroke="var(--c-fg)" stroke-width="2"><line x1="22" y1="20" x2="36" y2="34"/><line x1="36" y1="20" x2="22" y2="34"/></g><text class="hl" x="48" y="32">the drone, as the flight log has it</text></svg>';
+    host.innerHTML = s;
+    var tri = $("#tri"), note = $("#rays-note"), svg = $("#raysvg");
+    function upd() {
+      var on = tri.checked; svg.classList.toggle("on", on);
+      note.textContent = on ? "On: the rays meet at the drone, and the answer is the same from any starting guess." : "Off: the rays miss the drone, yet the triangulated point can still sit on the log.";
+    }
+    tri.addEventListener("change", upd);
+  })();
+
+  /* ---------- projects rail ---------- */
+  (function () {
+    var rail = $("#rail"), prev = $("#prev"), next = $("#next"); if (!rail) return;
+    function step() { var c = rail.querySelector(".card"); return c ? c.getBoundingClientRect().width + 16 : 320; }
+    function upd() { prev.disabled = rail.scrollLeft < 8; next.disabled = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 8; }
+    prev.addEventListener("click", function () { rail.scrollBy({ left: -step(), behavior: reduce ? "auto" : "smooth" }); });
+    next.addEventListener("click", function () { rail.scrollBy({ left: step(), behavior: reduce ? "auto" : "smooth" }); });
+    rail.addEventListener("scroll", upd, { passive: true }); window.addEventListener("resize", upd); upd();
+    rail.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight") { e.preventDefault(); next.click(); } else if (e.key === "ArrowLeft") { e.preventDefault(); prev.click(); }
+    });
+  })();
+
+  /* ---------- nav highlight ---------- */
+  (function () {
+    var links = $$(".nav ul a"); if (!links.length || !("IntersectionObserver" in window)) return;
+    var map = {}; links.forEach(function (a) { map[a.getAttribute("href").slice(1)] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (a) { a.classList.remove("on"); }); if (map[en.target.id]) map[en.target.id].classList.add("on");
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    ["top", "highlights", "research", "work", "path", "story", "contact"].forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
+  })();
+
+  /* ---------- copy the address ---------- */
+  (function () {
+    var btn = $("#copy"), mail = $("#email"); if (!btn) return;
+    btn.addEventListener("click", function () {
+      var txt = mail.textContent.trim();
+      function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy address"; }, 1800); }
+      function fallback() {
+        try { var r = document.createRange(); r.selectNodeContents(mail); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); } catch (e) {}
+        btn.textContent = "Selected";
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+    });
+  })();
+})();
+</script>
+
+</body></html>
